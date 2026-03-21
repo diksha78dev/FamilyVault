@@ -1,5 +1,6 @@
 spring.datasource.url=jdbc:mysql://localhost:3306/FamilyVault
 spring.datasource.username=root
-spring.datasource.password=Diksha#78
+spring.datasource.password=YOUR_PASSWORD_HERE
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+server.port=8080
