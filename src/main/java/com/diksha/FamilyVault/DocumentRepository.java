@@ -9,5 +9,5 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document , Long>{
     List<Document> findByFamilyCode(String familyCode);
     List<Document> findByFamilyCodeAndNameContaining(String familyCode , String name);
-    List<Document> finByFamilyCodeAndCategory(String familyCode , String category);
+    List<Document> findByFamilyCodeAndCategory(String familyCode , String category);
 }
