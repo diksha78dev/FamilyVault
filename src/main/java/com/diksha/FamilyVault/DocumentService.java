@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 import java.util.*;
 
+//It is the Service layer which handles the actual work like upload , get all files , search by name , put all documents according to the category
 @Service
 public class DocumentService {
 
