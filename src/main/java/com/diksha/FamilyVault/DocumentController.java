@@ -32,9 +32,9 @@ public class DocumentController {
 
     @GetMapping("/{familyCode}/search")
     public List<Document> searchByName(
-            @PathVariable String familyCode ,
+            @PathVariable String familyCode,
             @RequestParam String name) {
-        return documentService.searchByName(familyCode , name);
+        return documentService.searchByName(familyCode, name);
     }
 
     @GetMapping("/{familyCode}/category")
