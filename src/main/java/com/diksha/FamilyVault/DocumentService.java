@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 
 import java.util.*;
 
@@ -21,8 +23,17 @@ public class DocumentService {
     public Document uploadDocument(MultipartFile file , String name , String category , String familyCode) throws IOException {
         String uploadDir = "C:/Users/diksh/uploads/";          //It is like address of the file(Cupboard)
         Files.createDirectories(Paths.get(uploadDir));        //if cupboard is not present then Create it newly
-        String filePath = uploadDir + file.getOriginalFilename();       //gives original uploaded file name
-        Files.copy(file.getInputStream() , Paths.get(filePath));        //save file to disk
+
+        String original = file.getOriginalFilename();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+
+        int dotIndex = original.lastIndexOf(".");
+        String nameWithoutExtension = original.substring(0, dotIndex);
+        String extension = original.substring(dotIndex);
+
+        String fileName = nameWithoutExtension + "_" + timestamp + extension;
+        String filePath = uploadDir + fileName;       //gives original uploaded file name
+        Files.copy(file.getInputStream(), Paths.get(filePath));        //save file to disk
 
 
         //save file attributes in the database via document repo and then document

@@ -11,7 +11,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000/")
 public class DocumentController {
 
-    // injecting Service here , like repository injection
+    // injecting Service here , like repository injmection
     @Autowired
     private DocumentService documentService;
 
