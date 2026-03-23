@@ -24,7 +24,7 @@ public class DocumentService {
         String uploadDir = "C:/Users/diksh/uploads/";          //It is like address of the file(Cupboard)
         Files.createDirectories(Paths.get(uploadDir));        //if cupboard is not present then Create it newly
 
-        String original = file.getOriginalFilename();
+        String original = file.getOriginalFilename().replace(" " , "_");
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 
         int dotIndex = original.lastIndexOf(".");
