@@ -16,6 +16,11 @@ function DocumentList() {
   };
 
   const searchDocuments = async () => {
+    if(searchName === '') {
+        setSearchResults([]);
+        return;
+    }
+
     const response = await fetch(
       `http://localhost:8080/documents/${familyCode}/search?name=${searchName}`
     );

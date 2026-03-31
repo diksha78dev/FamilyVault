@@ -27,6 +27,6 @@ public class Document {
     private String filePath;
     private String familyCode;
     
-    @JsonFormat(pattern = "dd MMM yyyy , hh:mm:a")
+    @JsonFormat(pattern = "dd MMM yyyy, hh:mm a")
     private LocalDateTime uploadAt;
 }
