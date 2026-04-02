@@ -21,7 +21,7 @@ public class DocumentService {
 
     //Method 1 : to upload document
     public Document uploadDocument(MultipartFile file , String name , String category , String familyCode) throws IOException {
-        String uploadDir = "C:/Users/diksh/uploads/";          //It is like address of the file(Cupboard)
+        String uploadDir = "uploads/";          //It is like address of the file(Cupboard)
         Files.createDirectories(Paths.get(uploadDir));        //if cupboard is not present then Create it newly
 
         String original = file.getOriginalFilename().replace(" " , "_");
