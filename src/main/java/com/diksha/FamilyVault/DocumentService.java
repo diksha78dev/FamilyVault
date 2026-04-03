@@ -28,9 +28,17 @@ public class DocumentService {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 
         int dotIndex = original.lastIndexOf(".");
-        String nameWithoutExtension = original.substring(0, dotIndex);
-        String extension = original.substring(dotIndex);
+        String nameWithoutExtension;
+        String extension;
 
+        if(dotIndex == -1) {
+            nameWithoutExtension = original;    //use full name
+            extension = "";                     //no extension
+        }
+        else {
+            nameWithoutExtension = original.substring(0, dotIndex);
+            extension = original.substring(dotIndex);
+        }
         String fileName = nameWithoutExtension + "_" + timestamp + extension;
         String filePath = uploadDir + fileName;       //gives original uploaded file name
         Files.copy(file.getInputStream(), Paths.get(filePath));        //save file to disk
