@@ -29,6 +29,14 @@ function DocumentList() {
   const [activeCategory, setActiveCategory] = useState(null); // null = show all
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  // this will help to confirm the file deletion like are you sure you want to delete this file?
+  const [confirmDelete , setConfirmDelete] = useState(null);
+  const [toast , setToast] = useState(null);
+
+  const showToast = (type, msg) => {
+    setToast({ type , msg });
+    setTimeout(() => setToast(null) , 3000);
+  };
 
   const fetchDocuments = async (code) => {
     const fc = code || familyCode;
@@ -75,6 +83,32 @@ function DocumentList() {
 
   const handleDownload = (id) => {
     window.open(`http://localhost:8080/documents/${id}/download` , '_blank');
+  };
+
+  const handleDelete = async (id) => {
+    const deleteName = confirmDelete.name;
+    try {
+        // fetch with method DELETE hits our new backend endpoint
+        // No body needed — the id is in the URL itself
+        const res = await fetch(`http://localhost:8080/documents/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (res.ok) {
+            // This is the key part — we don't reload the page
+            // We FILTER out the deleted document from our state array
+            // filter() creates a new array keeping only documents
+            // whose id does NOT match the deleted one
+            // React sees state changed → automatically re-renders the list
+            setDocuments(prev => prev.filter(doc => doc.id !== id));
+            
+            // Close the confirmation dialog
+            setConfirmDelete(null);
+            showToast('success' , `"${deleteName}" deleted successfully.`);
+        }
+    } catch (err) {
+        showToast('error' , 'Could not delete. Is your backend running?');
+    }
   };
 
   return (
@@ -172,7 +206,7 @@ function DocumentList() {
                       <th>Document Name</th>
                       <th>Category</th>
                       <th>Date Uploaded</th>
-                      <th>Download</th>
+                      <th>Download / Delete</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -201,7 +235,17 @@ function DocumentList() {
                             >
                               ⬇ Download
                             </button>
+                            {/* When Clicked , we dn;t delete immediately */}
+                            {/* we set the confirmDelete state to the id of the document we want to delete */}
+                            <button
+                              className="fv-btn fv-btn-danger"
+                              style={{ padding: '6px 14px' , fontSize: '13px' , marginLeft: '8px' }}
+                              onClick={() => setConfirmDelete(doc)}
+                            >
+                              🗑️ Delete
+                            </button>
                           </td>
+                          
                         </tr>
                       );
                     })}
@@ -209,8 +253,51 @@ function DocumentList() {
                 </table>
               )}
             </div>
+            {/* confirmDelete is null → dialog is invisible */}
+            {/* confirmDelete has a document → dialog appears */}
+            {confirmDelete && (
+                <div className="fv-dialog-overlay">
+                    {/* Clicking the grey overlay also closes the dialog — good UX */}
+                    <div className="fv-dialog">
+                        <div className="fv-dialog-icon">🗑️</div>
+                        <div className="fv-dialog-title">Delete Document?</div>
+                        <div className="fv-dialog-msg">
+                            {/* We show the document NAME so user knows exactly what they're deleting */}
+                            Are you sure you want to delete <strong>"{confirmDelete.name}"</strong>?
+                            <br />
+                            <span style={{ color: 'var(--text-mid)', fontSize: '13px' }}>
+                                This cannot be undone.
+                            </span>
+                        </div>
+                        <div className="fv-dialog-actions">
+                            {/* Cancel — just closes dialog, nothing deleted */}
+                            <button
+                                className="fv-btn fv-btn-outline"
+                                onClick={() => setConfirmDelete(null)}
+                            >
+                                Cancel
+                            </button>
+                            {/* Confirm — calls handleDelete with the stored document id */}
+                            <button
+                                className="fv-btn fv-btn-danger"
+                                onClick={() => handleDelete(confirmDelete.id)}
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
           </div>
         </>
+      )}
+
+      {/* Toast moved OUTSIDE the table card so it's not clipped by overflow: hidden */}
+      {toast && (
+        <div className={`fv-toast fv-toast-${toast.type}`}
+          style={{ position: 'fixed' , top: '24px' , right: '24px' , zIndex: 1000 , minWidth: '280px' }}>
+            {toast.type === 'success' ? '✅' : '❌'} {toast.msg}
+        </div>
       )}
 
       {/* First time, no code entered */}

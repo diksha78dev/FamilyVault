@@ -73,4 +73,20 @@ public class DocumentService {
     public Document getDocumentById(Long id) {
         return documentRepository.findById(id).orElseThrow(() -> new RuntimeException("Document not found with id: " + id));
     }
+
+    // Method 5 : Delete a file
+    public void deleteDocument(Long id) throws IOException {
+        // Finding the document in db first so that we will not lose the filepath
+        Document doc = documentRepository.findById(id).orElseThrow(() -> new RuntimeException("Document not Found: "+id));
+
+        // deleting the file from disk
+        //Paths.get converts string path(uploads/aadhar_2025) into proper object Java works with
+        Path filePath = Paths.get(doc.getFilePath());
+
+        //delete file if it exists maybe someone have already deleted then it should throw error
+        Files.deleteIfExists(filePath);
+
+        //Delete file from db
+        documentRepository.deleteById(id);
+    }
 }

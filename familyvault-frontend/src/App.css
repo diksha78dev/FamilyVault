@@ -519,3 +519,66 @@ table.fv-table {
 @media (min-width: 769px) {
   .fv-mobile-nav { display: none; }
 }
+
+/* Red delete button */
+.fv-btn-danger {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+}
+.fv-btn-danger:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+/* Dark overlay behind the dialog — covers the whole screen */
+/* position fixed means it stays even if you scroll */
+.fv-dialog-overlay {
+    position: fixed;
+    inset: 0; /* shorthand for top:0, right:0, bottom:0, left:0 */
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999; /* sits on top of everything */
+}
+
+/* The white box in the center */
+.fv-dialog {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideIn 0.2s ease;
+}
+
+.fv-dialog-icon { font-size: 36px; margin-bottom: 12px; }
+
+.fv-dialog-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.fv-dialog-msg {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.fv-dialog-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.fv-dialog-actions .fv-btn {
+    width: auto;
+    padding: 10px 24px;
+}

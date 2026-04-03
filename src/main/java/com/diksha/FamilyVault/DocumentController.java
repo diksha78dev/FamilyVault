@@ -75,6 +75,11 @@ public class DocumentController {
                 .body(resource);
     }
 
-
+    //annotation listens to the http delete requests
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteDocument(@PathVariable Long id) throws IOException {
+        documentService.deleteDocument(id);
+        return ResponseEntity.ok("Document deleted successfully");
+    }
 
 }
