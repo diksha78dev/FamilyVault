@@ -73,6 +73,10 @@ function DocumentList() {
     setSearchName('');
   };
 
+  const handleDownload = (id) => {
+    window.open(`http://localhost:8080/documents/${id}/download` , '_blank');
+  };
+
   return (
     <div>
       {/* Family code entry bar */}
@@ -168,6 +172,7 @@ function DocumentList() {
                       <th>Document Name</th>
                       <th>Category</th>
                       <th>Date Uploaded</th>
+                      <th>Download</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,6 +193,15 @@ function DocumentList() {
                             </span>
                           </td>
                           <td className="fv-date">{doc.uploadAt}</td>
+                          <td>
+                            <button
+                              className="fv-btn fv-btn-outline"
+                              style={{ padding: '6px 14px', fontSize: '13px' }}
+                              onClick={() => handleDownload(doc.id)}
+                            >
+                              ⬇ Download
+                            </button>
+                          </td>
                         </tr>
                       );
                     })}
