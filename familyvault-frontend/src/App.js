@@ -54,7 +54,7 @@ function App() {
         </div>
         
         <div className="fv-views">
-          {activeView === 'documents' && <DocumentList />}
+          {activeView === 'document' && <DocumentList />}
           {activeView === 'upload' && <UploadForm />}
         </div>
       </main>
@@ -64,7 +64,7 @@ function App() {
         {NAV_ITEMS.map((item) => (
           <button
             key={item.key}
-            className={`fv-mobile-nav-item ${activeView == item.key ? 'active' : ''}`}
+            className={`fv-mobile-nav-item ${activeView === item.key ? 'active' : ''}`}
             onClick={() => setActiveView(item.key)}
           >
             <span>{item.icon}</span>

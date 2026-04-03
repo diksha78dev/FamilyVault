@@ -322,7 +322,7 @@ body {
 /* ---- QUICK ACCESS CARDS ---- */
 .fv-quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 14px;
   margin-bottom: 28px;
 }
@@ -330,7 +330,7 @@ body {
 .fv-quick-card {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: 18px 20px;
+  padding: 12px 16px;
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: all 0.2s;
@@ -359,7 +359,7 @@ body {
 }
 
 .fv-quick-card-count {
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-mid);
   margin-top: 2px;
 }
