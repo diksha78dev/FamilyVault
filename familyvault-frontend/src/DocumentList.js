@@ -1,63 +1,219 @@
 import { useState } from 'react';
 
+const CATEGORIES = ['Medical', 'Identity', 'Property', 'Financial', 'Insurance', 'Education', 'Other'];
+
+const CATEGORY_META = {
+  Medical:    { icon: '🏥', color: '#fef2f2' },
+  Identity:   { icon: '🪪', color: '#fff7ed' },
+  Property:   { icon: '🏠', color: '#f0fdf4' },
+  Financial:  { icon: '💰', color: '#eff6ff' },
+  Insurance:  { icon: '🛡️', color: '#fdf4ff' },
+  Education:  { icon: '🎓', color: '#f0f9ff' },
+  Other:      { icon: '📁', color: '#f8fafc' },
+};
+
+function getDocIcon(filePath) {
+  if (!filePath) return { icon: '📎', cls: 'other' };
+  const ext = filePath.split('.').pop().toLowerCase();
+  if (ext === 'pdf') return { icon: '📄', cls: 'pdf' };
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return { icon: '🖼️', cls: 'img' };
+  if (['doc', 'docx'].includes(ext)) return { icon: '📝', cls: 'doc' };
+  return { icon: '📎', cls: 'other' };
+}
+
 function DocumentList() {
   const [familyCode, setFamilyCode] = useState('');
+  const [inputCode, setInputCode] = useState('');
   const [documents, setDocuments] = useState([]);
   const [searchName, setSearchName] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(null); // null = show all
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
 
-  const fetchDocuments = async () => {
-    const response = await fetch(
-      `http://localhost:8080/documents/${familyCode}`
-    );
-    const data = await response.json();
-    setDocuments(data);
-    setSearchResults([]);  // clear old search when loading fresh
-  };
-
-  const searchDocuments = async () => {
-    if(searchName === '') {
-        setSearchResults([]);
-        return;
+  const fetchDocuments = async (code) => {
+    const fc = code || familyCode;
+    if (!fc) return;
+    setLoading(true);
+    setActiveCategory(null);
+    setSearchName('');
+    try {
+      const res = await fetch(`http://localhost:8080/documents/${fc}`);
+      const data = await res.json();
+      setDocuments(data);
+      setFetched(true);
+    } catch {
+      setDocuments([]);
+      setFetched(true);
     }
-
-    const response = await fetch(
-      `http://localhost:8080/documents/${familyCode}/search?name=${searchName}`
-    );
-    const data = await response.json();
-    setSearchResults(data);
+    setLoading(false);
   };
 
-  const displayList = searchResults.length > 0 ? searchResults : documents;
+  const handleLoad = () => {
+    setFamilyCode(inputCode);
+    fetchDocuments(inputCode);
+  };
+
+  // Count docs per category
+  const categoryCounts = CATEGORIES.reduce((acc, cat) => {
+    acc[cat] = documents.filter((d) => d.category === cat).length;
+    return acc;
+  }, {});
+
+  // Filter logic: category first, then search
+  const filteredDocs = documents.filter((doc) => {
+    const matchCat = activeCategory ? doc.category === activeCategory : true;
+    const matchSearch = searchName
+      ? doc.name.toLowerCase().includes(searchName.toLowerCase())
+      : true;
+    return matchCat && matchSearch;
+  });
+
+  const handleCategoryClick = (cat) => {
+    setActiveCategory(activeCategory === cat ? null : cat);
+    setSearchName('');
+  };
 
   return (
     <div>
-      <h2>View Family Documents</h2>
-      <input
-        type="text"
-        placeholder="Enter Family Code"
-        onChange={(e) => setFamilyCode(e.target.value)}
-      />
-      <button onClick={fetchDocuments}>Get Documents</button>
+      {/* Family code entry bar */}
+      <div className="fv-family-bar">
+        <span style={{ fontSize: 20 }}>👨‍👩‍👧</span>
+        <input
+          className="fv-input"
+          type="text"
+          placeholder="Enter your Family Code (e.g. SHARMA2024)"
+          value={inputCode}
+          onChange={(e) => setInputCode(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
+          style={{ margin: 0 }}
+        />
+        <button className="fv-btn fv-btn-primary" style={{ width: 'auto', whiteSpace: 'nowrap' }} onClick={handleLoad}>
+          Load Documents
+        </button>
+      </div>
 
-      {documents.length > 0 && (
-        <div>
-          <input
-            type="text"
-            placeholder="Search by document name"
-            onChange={(e) => setSearchName(e.target.value)}
-          />
-          <button onClick={searchDocuments}>Search</button>
+      {/* Quick Access Category Cards */}
+      {fetched && documents.length > 0 && (
+        <>
+          <div className="fv-quick-grid">
+            {CATEGORIES.filter((c) => categoryCounts[c] > 0).map((cat) => {
+              const meta = CATEGORY_META[cat];
+              return (
+                <div
+                  key={cat}
+                  className={`fv-quick-card ${activeCategory === cat ? 'selected' : ''}`}
+                  onClick={() => handleCategoryClick(cat)}
+                >
+                  <div className="fv-quick-card-icon" style={{ background: meta.color }}>
+                    {meta.icon}
+                  </div>
+                  <div>
+                    <div className="fv-quick-card-label">{cat}</div>
+                    <div className="fv-quick-card-count">{categoryCounts[cat]} document{categoryCounts[cat] !== 1 ? 's' : ''}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Document Table */}
+          <div className="fv-table-card">
+            <div className="fv-table-header">
+              <div className="fv-table-title">
+                {activeCategory ? `${CATEGORY_META[activeCategory]?.icon} ${activeCategory} Documents` : '📋 All Documents'}
+                <span style={{ fontWeight: 400, color: 'var(--text-mid)', marginLeft: 8, fontSize: 13 }}>
+                  ({filteredDocs.length})
+                </span>
+              </div>
+
+              <div className="fv-table-controls">
+                <div className="fv-search-wrap">
+                  <span className="fv-search-icon">🔍</span>
+                  <input
+                    className="fv-input fv-search-input"
+                    type="text"
+                    placeholder="Search by name…"
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                    style={{ margin: 0, minWidth: 200 }}
+                  />
+                </div>
+                {activeCategory && (
+                  <button
+                    className="fv-btn fv-btn-outline"
+                    style={{ whiteSpace: 'nowrap', padding: '9px 14px' }}
+                    onClick={() => setActiveCategory(null)}
+                  >
+                    ✕ Clear filter
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="fv-table-wrap">
+              {loading ? (
+                <div className="fv-loading">
+                  <div className="fv-spinner" />
+                  Loading your documents…
+                </div>
+              ) : filteredDocs.length === 0 ? (
+                <div className="fv-empty">
+                  <div className="fv-empty-icon">🔍</div>
+                  <div className="fv-empty-text">No documents found for this filter.</div>
+                </div>
+              ) : (
+                <table className="fv-table">
+                  <thead>
+                    <tr>
+                      <th>Document Name</th>
+                      <th>Category</th>
+                      <th>Date Uploaded</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDocs.map((doc) => {
+                      const { icon, cls } = getDocIcon(doc.filePath);
+                      const badgeCls = `badge-${doc.category || 'Other'}`;
+                      return (
+                        <tr key={doc.id}>
+                          <td>
+                            <div className="fv-doc-name">
+                              <div className={`fv-doc-icon ${cls}`}>{icon}</div>
+                              <span className="fv-doc-name-text">{doc.name}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`fv-badge ${badgeCls}`}>
+                              {doc.category || 'Other'}
+                            </span>
+                          </td>
+                          <td className="fv-date">{doc.uploadAt}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* First time, no code entered */}
+      {!fetched && (
+        <div className="fv-empty" style={{ marginTop: 40 }}>
+          <div className="fv-empty-icon">🔐</div>
+          <div className="fv-empty-text">Enter your family code above to view documents.</div>
         </div>
       )}
 
-      <ul>
-        {displayList.map((doc) => (
-          <li key={doc.id}>
-            <b>{doc.name}</b> — {doc.category} — {doc.uploadAt}
-          </li>
-        ))}
-      </ul>
+      {/* Code entered but nothing found */}
+      {fetched && documents.length === 0 && !loading && (
+        <div className="fv-empty" style={{ marginTop: 40 }}>
+          <div className="fv-empty-icon">📭</div>
+          <div className="fv-empty-text">No documents found for family code <strong>{familyCode}</strong>.<br />Try uploading one first!</div>
+        </div>
+      )}
     </div>
   );
 }

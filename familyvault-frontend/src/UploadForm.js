@@ -1,12 +1,26 @@
 import {useState} from 'react';
 
+const CATEGORIES = ['Medical', 'Identity' , 'Property', 'Financial', 'Insurance', 'Education', 'Other'];
+
 function UploadForm() {
   const [name , setName] = useState('');
   const [category , setCategory] = useState('');
   const [familyCode , setFamilyCode] = useState('');
   const [file , setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [toast , setToast] = useState(null);
+
+  const showToast = (type, msg) => {
+    setToast({ type, msg});
+    setTimeout(() => setToast(null) , 3500);
+  };
 
   const handleUpload = async () => {
+    if(!name || !category || !familyCode || !file) {
+      showToast('error','Please fill in all the fields and select a file.');
+      return;
+    }
+
     const formData = new FormData();
     // JS object that can hold key-value pairs, where the value can be a string or a file
     formData.append('name' , name);
@@ -14,36 +28,119 @@ function UploadForm() {
     formData.append('familyCode' , familyCode);
     formData.append('file' , file);
 
-    const response = await fetch('http://localhost:8080/documents/upload' , {
-      method : 'POST' ,
-      body : formData
-    });
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/documents/upload' , {
+        method: 'POST',
+        body: formData
+      });
 
-    if(response.ok) {
-      alert('Document uploaded Successfully!');
+      if(response.ok) {
+        showToast('success', `"${name}" uploaded successfully! ✓`);
+        setName(''); setCategory(''); setFamilyCode(''); setFile(null);
+        setLoading(false);
+      }
+      else {
+        showToast('error', 'Upload failed. is your backend running on port 8080?');
+        setLoading(false);
+      }
+    } catch (err) {
+      showToast('error', 'Cannot reach server. Check if Spring Boot is running.');
+      setLoading(false);
     }
-    else {
-      alert('Failed to upload document!');
-    }
+    
   };
 
-    return (
-      <div>
-        <h2>Upload Document</h2>
-        {/* e is the event object */}
-        <input type="text" placeholder = "Document: Name" 
-          onChange = {(e) => setName(e.target.value)}/>
+  const getFileIcon = (f) => {
+    if(!f) return null;
+    const ext = f.name.split('.').pop().toLowerCase();
+    if(ext === 'pdf') return '📄';
+    if(['jpg', 'jpeg' , 'png'].includes(ext)) return '🖼️';
+    if(['doc', 'docx'].includes(ext)) return '📝';
+    return '📎';
+  };
+
+  return (
+      <div className="fv-upload-card">
+        <div className="fv-card-title">
+          <span>📤</span> Upload New Document
+        </div>
+
+        <div className="fv-form-grid">
+          <div className="fv-form-group">
+            <label>Document Name</label>
+            <input
+              className="fv-input"
+              type="text"
+              placeholder="e.g. Dad's Aadhaar Card"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="fv-form-group">
+            <label>Family Code</label>
+            <input
+              className="fv-input"
+              type="text"
+              placeholder="e.g. SHARMA2024"
+              value={familyCode}
+              onChange={(e) => setFamilyCode(e.target.value)}
+            />
+          </div>
+        </div>
         
-        <input type="text" placeholder = "Category" 
-          onChange = {(e) => setCategory(e.target.value)}/>
+        <div className="fv-form-group" style={{ marginBottom: '14px' }}>
+          <label>Category</label>
+          <select
+            className="fv-input fv-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">Select a category...</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
 
-        <input type="text" placeholder = "Family Code" 
-          onChange = {(e) => setFamilyCode(e.target.value)}/>
+        <div 
+          className="fv-form-drop"
+          onClick={(e) => document.getElementById('fv-file-input').click()}
+        >
+          <input
+            id="fv-file-input"
+            type="file"
+            style={{ display: 'none' }}
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <div className="fv-file-drop-icon">
+            {file ? getFileIcon(file) : '☁️'}
+          </div>
+          {file ? (
+            <div className="fv-file-name">
+              {file.name} &nbsp;.&nbsp; {(file.size / 1024).toFixed(1)} KB
+            </div>
+          ) : (
+            <div className="fv-file-drop-text">
+              <span>Click to choose a file</span>
+              <br />PDF, JPG , PNG , Word documents
+            </div>
+          )}
+        </div>
 
-        <input type="file" 
-          onChange = {(e) => setFile(e.target.files[0])}/>
+        <button
+          className="fv-btn fv-btn-primary"
+          onClick={handleUpload}
+          disabled={loading}
+        >
+          {loading ? 'Uploading...' : '⬆️ Upload Document'}
+        </button>
 
-        <button onClick={handleUpload}>Upload</button>
+        {toast && (
+          <div className={`fv-toast fv-toast-${toast.type}`}>
+            {toast.type === 'success' ? '✅' : '❌'} {toast.msg}
+          </div>
+        )}
       </div>
     );
   }
