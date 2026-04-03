@@ -68,4 +68,9 @@ public class DocumentService {
     public List<Document> getByCategory(String familyCode , String category) {
         return documentRepository.findByFamilyCodeAndCategory(familyCode , category);
     }
+
+    //Method 5 : get a document using id
+    public Document getDocumentById(Long id) {
+        return documentRepository.findById(id).orElseThrow(() -> new RuntimeException("Document not found with id: " + id));
+    }
 }
