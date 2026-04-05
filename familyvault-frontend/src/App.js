@@ -4,16 +4,18 @@ import UploadForm from './UploadForm';
 import DocumentList from './DocumentList';
 
 const NAV_ITEMS = [
-  {key: 'document', icon: '📋', label : 'All Documents'},
-  {key: 'upload' , icon: '📤',label:'Upload Document'},
+  { key: 'document', icon: '📋', label: 'All Documents' },
+  { key: 'upload', icon: '📤', label: 'Upload Document' },
 ];
 
-function App() {
-  const [activeView , setActiveView] = useState('document');
+// familyCode and pin come from AuthWrapper as props
+// the login page already verified them — no need to ask again
+function App({ familyCode, pin }) {
+  const [activeView, setActiveView] = useState('document');
 
   const PAGE_META = {
-    document : { title: 'Family Documents' , sub: 'View and Search all your family documents'},
-    upload: { title: 'Upload Document' , sub: 'Add a new document to your family vault'},
+    document: { title: 'Family Documents', sub: 'View and search all your family documents' },
+    upload: { title: 'Upload Document', sub: 'Add a new document to your family vault' },
   };
 
   return (
@@ -38,12 +40,13 @@ function App() {
           ))}
         </nav>
 
+        {/* show which family is logged in */}
         <div className="fv-sidebar-family">
-          📁 Family Document Safe
-          <strong> For Indian Families</strong>
+          📁 Logged in as
+          <strong>{familyCode}</strong>
         </div>
       </aside>
-      
+
       {/* Main Content */}
       <main className="fv-main">
         <div className="fv-page-header">
@@ -52,10 +55,14 @@ function App() {
             <div className="fv-page-sub">{PAGE_META[activeView].sub}</div>
           </div>
         </div>
-        
+
         <div className="fv-views">
-          {activeView === 'document' && <DocumentList />}
-          {activeView === 'upload' && <UploadForm />}
+          {activeView === 'document' && (
+            <DocumentList familyCode={familyCode} pin={pin} />
+          )}
+          {activeView === 'upload' && (
+            <UploadForm familyCode={familyCode} pin={pin} />
+          )}
         </div>
       </main>
 
