@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CATEGORIES = ['Medical', 'Identity', 'Property', 'Financial', 'Insurance', 'Education', 'Other'];
 
@@ -21,17 +21,12 @@ function getDocIcon(filePath) {
   return { icon: '📎', cls: 'other' };
 }
 
-function DocumentList() {
-  const [familyCode, setFamilyCode] = useState('');
-  const [inputCode, setInputCode] = useState('');
+function DocumentList({ familyCode , pin}) {  // receives props
   const [documents, setDocuments] = useState([]);
   const [searchName, setSearchName] = useState('');
   const [activeCategory, setActiveCategory] = useState(null); // null = show all
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
-  const [pin, setPin] = useState('');
-
-  // this will help to confirm the file deletion like are you sure you want to delete this file?
   const [confirmDelete , setConfirmDelete] = useState(null);
   const [toast , setToast] = useState(null);
 
@@ -40,30 +35,30 @@ function DocumentList() {
     setTimeout(() => setToast(null) , 3000);
   };
 
-  const fetchDocuments = async (code) => {
-    const fc = code || familyCode;
-    if (!fc) return;
-    setLoading(true);
-    setActiveCategory(null);
-    setSearchName('');
-    try {
-      const res = await fetch(
-        `http://localhost:8080/documents/${fc}?pin=${pin}`
-      );
-      const data = await res.json();
-      setDocuments(data);
-      setFetched(true);
-    } catch {
-      setDocuments([]);
-      setFetched(true);
-    }
-    setLoading(false);
-  };
+  // auto fetch when component loads — no button needed anymore
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      setLoading(true);
+      setActiveCategory(null);
+      setSearchName('');
+      try {
+        const res = await fetch(
+          `http://localhost:8080/documents/${familyCode}?pin=${pin}`
+        );
+        const data = await res.json();
+        setDocuments(data);
+        setFetched(true);
+      } catch {
+        setDocuments([]);
+        setFetched(true);
+      }
+      setLoading(false);
+    };
 
-  const handleLoad = () => {
-    setFamilyCode(inputCode);
-    fetchDocuments(inputCode);
-  };
+    fetchDocuments();
+  }, [familyCode, pin]);
+
+
 
   // Count docs per category
   const categoryCounts = CATEGORIES.reduce((acc, cat) => {
@@ -119,29 +114,7 @@ function DocumentList() {
   return (
     <div>
       {/* Family code entry bar */}
-      <div className="fv-family-bar">
-        <span style={{ fontSize: 20 }}>👨‍👩‍👧</span>
-        <input
-          className="fv-input"
-          type="text"
-          placeholder="Enter your Family Code (e.g. SHARMA2024)"
-          value={inputCode}
-          onChange={(e) => setInputCode(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
-          style={{ margin: 0 }}
-        />
-        <input
-          className="fv-input"
-          type="password"
-          placeholder="Family PIN"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          style={{ margin: 0, maxWidth: '140px' }}
-        />
-        <button className="fv-btn fv-btn-primary" style={{ width: 'auto', whiteSpace: 'nowrap' }} onClick={handleLoad}>
-          Load Documents
-        </button>
-      </div>
+      
 
       {/* Quick Access Category Cards */}
       {fetched && documents.length > 0 && (
