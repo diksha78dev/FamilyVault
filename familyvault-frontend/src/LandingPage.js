@@ -13,9 +13,9 @@ function LandingPage() {
         </div>
         <button
           className="lp-nav-btn"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/login')}
         >
-          Enter Dashboard →
+          Go to Login →
         </button>
       </nav>
 
@@ -33,7 +33,7 @@ function LandingPage() {
         <div className="lp-hero-btns">
           <button
             className="lp-btn-primary"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/login')}
           >
             Open Family Vault →
           </button>
@@ -125,7 +125,7 @@ function LandingPage() {
         <p className="lp-cta-sub">Not a WhatsApp group. Not a scattered folder. A vault.</p>
         <button
           className="lp-btn-primary lp-cta-btn"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/login')}
         >
           Open FamilyVault →
         </button>
