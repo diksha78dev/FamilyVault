@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController         // tells tp string that this class handles HTTP requests and return JSON
 @RequestMapping("/documents")       // every endpoint in this class will start with /documents
-@CrossOrigin(origins = "http://localhost:3000/")
+@CrossOrigin(origins = "*")
 public class DocumentController {
 
     // injecting Service here , like repository injmection
