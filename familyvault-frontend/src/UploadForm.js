@@ -9,6 +9,7 @@ function UploadForm() {
   const [file , setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast , setToast] = useState(null);
+  const [pin, setPin] = useState('');
 
   const showToast = (type, msg) => {
     setToast({ type, msg});
@@ -16,7 +17,7 @@ function UploadForm() {
   };
 
   const handleUpload = async () => {
-    if(!name || !category || !familyCode || !file) {
+    if(!name || !category || !familyCode || !pin || !file) {
       showToast('error','Please fill in all the fields and select a file.');
       return;
     }
@@ -27,6 +28,7 @@ function UploadForm() {
     formData.append('category' , category);
     formData.append('familyCode' , familyCode);
     formData.append('file' , file);
+    formData.append('pin', pin);
 
     setLoading(true);
     try {
@@ -85,6 +87,17 @@ function UploadForm() {
               placeholder="e.g. SHARMA2024"
               value={familyCode}
               onChange={(e) => setFamilyCode(e.target.value)}
+            />
+          </div>
+
+          <div className="fv-form-group">
+            <label>Family PIN</label>
+            <input
+              className="fv-input"
+              type="password"
+              placeholder="Enter family PIN"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
             />
           </div>
         </div>
