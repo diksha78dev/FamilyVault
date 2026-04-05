@@ -29,6 +29,8 @@ function DocumentList() {
   const [activeCategory, setActiveCategory] = useState(null); // null = show all
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [pin, setPin] = useState('');
+
   // this will help to confirm the file deletion like are you sure you want to delete this file?
   const [confirmDelete , setConfirmDelete] = useState(null);
   const [toast , setToast] = useState(null);
@@ -45,7 +47,9 @@ function DocumentList() {
     setActiveCategory(null);
     setSearchName('');
     try {
-      const res = await fetch(`http://localhost:8080/documents/${fc}`);
+      const res = await fetch(
+        `http://localhost:8080/documents/${fc}?pin=${pin}`
+      );
       const data = await res.json();
       setDocuments(data);
       setFetched(true);
@@ -90,9 +94,10 @@ function DocumentList() {
     try {
         // fetch with method DELETE hits our new backend endpoint
         // No body needed — the id is in the URL itself
-        const res = await fetch(`http://localhost:8080/documents/${id}`, {
-            method: 'DELETE'
-        });
+        const res = await fetch(
+          `http://localhost:8080/documents/${id}?familyCode=${familyCode}&pin=${pin}`,
+          { method: 'DELETE' }
+        );
         
         if (res.ok) {
             // This is the key part — we don't reload the page
@@ -124,6 +129,14 @@ function DocumentList() {
           onChange={(e) => setInputCode(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
           style={{ margin: 0 }}
+        />
+        <input
+          className="fv-input"
+          type="password"
+          placeholder="Family PIN"
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+          style={{ margin: 0, maxWidth: '140px' }}
         />
         <button className="fv-btn fv-btn-primary" style={{ width: 'auto', whiteSpace: 'nowrap' }} onClick={handleLoad}>
           Load Documents
