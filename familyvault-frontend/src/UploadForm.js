@@ -2,14 +2,12 @@ import {useState} from 'react';
 
 const CATEGORIES = ['Medical', 'Identity' , 'Property', 'Financial', 'Insurance', 'Education', 'Other'];
 
-function UploadForm() {
+function UploadForm({ familyCode, pin }) {
   const [name , setName] = useState('');
   const [category , setCategory] = useState('');
-  const [familyCode , setFamilyCode] = useState('');
   const [file , setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast , setToast] = useState(null);
-  const [pin, setPin] = useState('');
 
   const showToast = (type, msg) => {
     setToast({ type, msg});
@@ -17,7 +15,7 @@ function UploadForm() {
   };
 
   const handleUpload = async () => {
-    if(!name || !category || !familyCode || !pin || !file) {
+    if(!name || !category || !file) {
       showToast('error','Please fill in all the fields and select a file.');
       return;
     }
@@ -37,9 +35,12 @@ function UploadForm() {
         body: formData
       });
 
-      if(response.ok) {
+      if (response.ok) {
         showToast('success', `"${name}" uploaded successfully! ✓`);
-        setName(''); setCategory(''); setFamilyCode(''); setFile(null);
+        setName('');
+        setCategory('');
+        setFile(null);
+        // do NOT reset familyCode and pin — they are props now
         setLoading(false);
       }
       else {
@@ -77,27 +78,6 @@ function UploadForm() {
               placeholder="e.g. Dad's Aadhaar Card"
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="fv-form-group">
-            <label>Family Code</label>
-            <input
-              className="fv-input"
-              type="text"
-              placeholder="e.g. SHARMA2024"
-              value={familyCode}
-              onChange={(e) => setFamilyCode(e.target.value)}
-            />
-          </div>
-
-          <div className="fv-form-group">
-            <label>Family PIN</label>
-            <input
-              className="fv-input"
-              type="password"
-              placeholder="Enter family PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
             />
           </div>
         </div>
