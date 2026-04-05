@@ -24,62 +24,111 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
+    @Autowired
+    private FamilyGroupService familyGroupService;
+
+    //PROTECTED - UPLOAD NEEDS PIN
     @PostMapping("/upload")     // listens POST /documents/upload
-    public Document uploadDocument(     //returns Document object back as JSON
+    public ResponseEntity<?> uploadDocument(     //returns Document object back as JSON
             @RequestParam("file") MultipartFile file,
             @RequestParam("name") String name,
             @RequestParam("category") String category ,
-            @RequestParam("familyCode") String familyCode) throws IOException {
+            @RequestParam("familyCode") String familyCode,
+            @RequestParam("pin") String pin) throws IOException {
 
-        return documentService.uploadDocument(file , name , category , familyCode);
+        if(!familyGroupService.loginFamily(familyCode , pin)) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Wrong Family Code or PIN");
+        }
+
+        Document doc = documentService.uploadDocument(
+                file , name , category , familyCode);
+        return ResponseEntity.ok(doc);
     }
 
+    //PROTECTED -> VIEW ALL DOCS NEEDS PIN
     @GetMapping("/{familyCode}")
-    public List<Document> getByFamily(
-            @PathVariable String familyCode) {
-        return documentService.getDocumentByFamily(familyCode);
-    }
-
-    @GetMapping("/{familyCode}/search")
-    public List<Document> searchByName(
-            @PathVariable String familyCode,
-            @RequestParam String name) {
-        return documentService.searchByName(familyCode, name);
-    }
-
-    @GetMapping("/{familyCode}/category")
-    public List<Document> getByCategory(
+    public ResponseEntity<?> getByFamily(
             @PathVariable String familyCode ,
-            @RequestParam String category) {
-        return documentService.getByCategory(familyCode , category);
+            @RequestParam String pin) {
+        if(!familyGroupService.loginFamily(familyCode , pin)) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Wrong Family Code or PIN");
+        }
+        return ResponseEntity.ok(
+                documentService.getDocumentByFamily(familyCode));
     }
 
+    // PROTECTED — search needs PIN
+    @GetMapping("/{familyCode}/search")
+    public ResponseEntity<?> searchByName(
+            @PathVariable String familyCode,
+            @RequestParam String pin,
+            @RequestParam String name) {
+
+        if (!familyGroupService.loginFamily(familyCode, pin)) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Wrong family code or PIN.");
+        }
+
+        return ResponseEntity.ok(
+                documentService.searchByName(familyCode, name));
+    }
+
+    // PROTECTED — category filter needs PIN
+    @GetMapping("/{familyCode}/category")
+    public ResponseEntity<?> getByCategory(
+            @PathVariable String familyCode,
+            @RequestParam String pin,
+            @RequestParam String category) {
+
+        if (!familyGroupService.loginFamily(familyCode, pin)) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Wrong family code or PIN.");
+        }
+
+        return ResponseEntity.ok(
+                documentService.getByCategory(familyCode, category));
+    }
+
+    // UNPROTECTED for now — download (needs sessions, coming later)
     @GetMapping("/{id}/download")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) throws IOException {
-        // Step 1 : find document in db
+    public ResponseEntity<Resource> downloadDocument(
+            @PathVariable Long id) throws IOException {
+
         Document doc = documentService.getDocumentById(id);
-        // Step 2 : path object for file on the disk
         Path filePath = Paths.get(doc.getFilePath());
-
-        // Step 3 : put the file in the Resource Spring can send
         Resource resource = new FileSystemResource(filePath);
-
-        // Step 4 : Know the content type of file
         String contentType = Files.probeContentType(filePath);
-        if (contentType == null) contentType = "application/octet-stream";
+        if (contentType == null)
+            contentType = "application/octet-stream";
 
-        // Step 5 : send file with headers that tell browser to download
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION , "attachment; filename=\"" + filePath.getFileName().toString() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\""
+                                + filePath.getFileName().toString() + "\"")
                 .body(resource);
     }
 
-    //annotation listens to the http delete requests
+    // PROTECTED — delete needs familyCode + PIN
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteDocument(@PathVariable Long id) throws IOException {
+    public ResponseEntity<String> deleteDocument(
+            @PathVariable Long id,
+            @RequestParam String familyCode,
+            @RequestParam String pin) throws IOException {
+
+        if (!familyGroupService.loginFamily(familyCode, pin)) {
+            return ResponseEntity
+                    .status(401)
+                    .body("Wrong family code or PIN.");
+        }
+
         documentService.deleteDocument(id);
         return ResponseEntity.ok("Document deleted successfully");
     }
-
 }
