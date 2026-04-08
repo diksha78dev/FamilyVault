@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 import UploadForm from './UploadForm';
 import DocumentList from './DocumentList';
@@ -10,12 +11,19 @@ const NAV_ITEMS = [
 
 // familyCode and pin come from AuthWrapper as props
 // the login page already verified them — no need to ask again
-function App({ familyCode, pin }) {
+function App({ familyCode, pin , onLogout }) {
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState('document');
 
   const PAGE_META = {
     document: { title: 'Family Documents', sub: 'View and search all your family documents' },
     upload: { title: 'Upload Document', sub: 'Add a new document to your family vault' },
+  };
+
+  // Handle logout: call parent's onLogout and navigate to login
+  const handleLogout = () => {
+    onLogout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -45,6 +53,13 @@ function App({ familyCode, pin }) {
           📁 Logged in as
           <strong>{familyCode}</strong>
         </div>
+        <button
+          className="fv-btn fv-btn-outline"
+          style={{ margin: '12px', fontSize: '13px' }}
+          onClick={handleLogout}
+        >
+          🚪 Logout
+        </button>
       </aside>
 
       {/* Main Content */}
