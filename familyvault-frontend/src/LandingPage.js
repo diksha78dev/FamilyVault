@@ -21,7 +21,6 @@ function LandingPage() {
 
       {/* ── HERO ── */}
       <section className="lp-hero">
-        <div className="lp-hero-badge">🏆 EliteHer Community Hackathon 2026</div>
         <h1 className="lp-hero-title">
           From Lost Files to<br />
           <span className="lp-hero-accent">Secure Families</span>
