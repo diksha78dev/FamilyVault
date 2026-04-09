@@ -1,56 +1,47 @@
 package com.diksha.FamilyVault;
 
+import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
-import java.io.*;
-import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-
+import java.util.HashMap;
 import java.util.*;
 
 //It is the Service layer which handles the actual work like upload , get all files , search by name , put all documents according to the category
 @Service
 public class DocumentService {
-
+    @Autowired
+    private Cloudinary cloudinary;
     @Autowired
     private DocumentRepository documentRepository;
 
     //Method 1 : to upload document
-    public Document uploadDocument(MultipartFile file , String name , String category , String familyCode) throws IOException {
-        String uploadDir = "uploads/";          //It is like address of the file(Cupboard)
-        Files.createDirectories(Paths.get(uploadDir));        //if cupboard is not present then Create it newly
+    public Document uploadDocument(MultipartFile file, String name, String category, String familyCode) throws IOException {
 
-        String original = file.getOriginalFilename().replace(" " , "_");
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        // Build upload options — folder organises files in Cloudinary dashboard
+        // resource_type "auto" handles PDFs, images, Word docs — everything
+        Map<String, Object> options = new HashMap<>();
+        options.put("folder", "familyvault/" + familyCode);
+        options.put("resource_type", "auto");
 
-        int dotIndex = original.lastIndexOf(".");
-        String nameWithoutExtension;
-        String extension;
+        // Upload file to Cloudinary
+        // file.getBytes() converts the file into raw bytes Cloudinary can send
+        // upload() returns a Map containing URL, public_id, size, format etc.
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
 
-        if(dotIndex == -1) {
-            nameWithoutExtension = original;    //use full name
-            extension = "";                     //no extension
-        }
-        else {
-            nameWithoutExtension = original.substring(0, dotIndex);
-            extension = original.substring(dotIndex);
-        }
-        String fileName = nameWithoutExtension + "_" + timestamp + extension;
-        String filePath = uploadDir + fileName;       //gives original uploaded file name
-        Files.copy(file.getInputStream(), Paths.get(filePath));        //save file to disk
+        // secure_url is the permanent HTTPS link to the uploaded file
+        String fileUrl = (String) uploadResult.get("secure_url");
 
-
-        //save file attributes in the database via document repo and then document
+        // Save document metadata in MySQL — fileUrl replaces old local filePath
         Document doc = new Document();
         doc.setName(name);
         doc.setCategory(category);
         doc.setFamilyCode(familyCode);
         doc.setUploadAt(LocalDateTime.now());
-        doc.setFilePath(filePath);
+        doc.setFilePath(fileUrl);
         return documentRepository.save(doc);
     }
 
@@ -76,17 +67,25 @@ public class DocumentService {
 
     // Method 5 : Delete a file
     public void deleteDocument(Long id) throws IOException {
-        // Finding the document in db first so that we will not lose the filepath
-        Document doc = documentRepository.findById(id).orElseThrow(() -> new RuntimeException("Document not Found: "+id));
+        // Find document in DB first to get the Cloudinary URL
+        Document doc = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not Found: " + id));
 
-        // deleting the file from disk
-        //Paths.get converts string path(uploads/aadhar_2025) into proper object Java works with
-        Path filePath = Paths.get(doc.getFilePath());
+        // Extract public_id from Cloudinary URL to delete it from Cloudinary
+        // URL looks like: https://res.cloudinary.com/cloudname/image/upload/v123/familyvault/SHARMA2024/filename.pdf
+        // public_id is everything after /upload/v123/ → familyvault/SHARMA2024/filename
+        String fileUrl = doc.getFilePath();
+        String publicId = fileUrl
+                .substring(fileUrl.indexOf("/upload/") + 8)  // cut everything before /upload/
+                .replaceFirst("v\\d+/", "")                   // remove version number like v1234567/
+                .replaceAll("\\.[^.]+$", "");                  // remove file extension
 
-        //delete file if it exists maybe someone have already deleted then it should throw error
-        Files.deleteIfExists(filePath);
+        // Tell Cloudinary to delete the file
+        Map options = new HashMap<>();
+        options.put("resource_type", "raw");
+        cloudinary.uploader().destroy(publicId, options);
 
-        //Delete file from db
+        // Delete from MySQL
         documentRepository.deleteById(id);
     }
 }
