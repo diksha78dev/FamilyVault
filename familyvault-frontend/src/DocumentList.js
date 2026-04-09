@@ -80,8 +80,8 @@ function DocumentList({ familyCode , pin}) {  // receives props
     setSearchName('');
   };
 
-  const handleDownload = (id) => {
-    window.open(`http://localhost:8080/documents/${id}/download` , '_blank');
+  const handleDownload = (doc) => {
+    window.open(doc.filePath, '_blank');
   };
 
   const handleDelete = async (id) => {
@@ -217,7 +217,7 @@ function DocumentList({ familyCode , pin}) {  // receives props
                             <button
                               className="fv-btn fv-btn-outline"
                               style={{ padding: '6px 14px', fontSize: '13px' }}
-                              onClick={() => handleDownload(doc.id)}
+                              onClick={() => handleDownload(doc)}
                             >
                               ⬇ Download
                             </button>
