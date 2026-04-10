@@ -30,7 +30,7 @@ function UploadForm({ familyCode, pin }) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/documents/upload' , {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/documents/upload`, {
         method: 'POST',
         body: formData
       });
