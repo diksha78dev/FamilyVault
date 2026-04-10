@@ -43,7 +43,7 @@ function DocumentList({ familyCode , pin}) {  // receives props
       setSearchName('');
       try {
         const res = await fetch(
-          `http://localhost:8080/documents/${familyCode}?pin=${pin}`
+            `${process.env.REACT_APP_API_URL}/documents/${familyCode}?pin=${pin}`
         );
         const data = await res.json();
         setDocuments(data);
@@ -90,8 +90,8 @@ function DocumentList({ familyCode , pin}) {  // receives props
         // fetch with method DELETE hits our new backend endpoint
         // No body needed — the id is in the URL itself
         const res = await fetch(
-          `http://localhost:8080/documents/${id}?familyCode=${familyCode}&pin=${pin}`,
-          { method: 'DELETE' }
+            `${process.env.REACT_APP_API_URL}/documents/${id}?familyCode=${familyCode}&pin=${pin}`,
+            { method: 'DELETE' }
         );
         
         if (res.ok) {
