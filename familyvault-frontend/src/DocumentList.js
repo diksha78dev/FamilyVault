@@ -80,8 +80,20 @@ function DocumentList({ familyCode , pin}) {  // receives props
     setSearchName('');
   };
 
-  const handleDownload = (doc) => {
-    window.open(doc.filePath, '_blank');
+  const handleDownload = async (doc) => {
+    try {
+      const res = await fetch(doc.filePath);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name;
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    catch (err) {
+      showToast('error' , 'Download failed. Please Try again.');
+    }
   };
 
   const handleDelete = async (id) => {
