@@ -32,8 +32,8 @@ function LoginPage({ onLoginSuccess }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/family/login?familyCode=${code}&pin=${p}`,
-        { method: 'POST' }
+          `${process.env.REACT_APP_API_URL}/family/login?familyCode=${code}&pin=${p}`,
+          { method: 'POST' }
       );
       if (res.ok) {
         // give the pass to AuthWrapper (parent)
@@ -64,8 +64,8 @@ function LoginPage({ onLoginSuccess }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/family/register?familyCode=${regCode}&pin=${regPin}`,
-        { method: 'POST' }
+          `${process.env.REACT_APP_API_URL}/family/register?familyCode=${regCode}&pin=${regPin}`,
+          { method: 'POST' }
       );
       if (res.ok) {
         // register worked → auto login immediately
