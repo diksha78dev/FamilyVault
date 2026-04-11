@@ -87,7 +87,11 @@ function DocumentList({ familyCode , pin}) {  // receives props
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = doc.name;
+      //Extract real filename with extension from Cloudinary URL
+      const fileName = doc.filePath.split('/').pop();
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
