@@ -41,6 +41,13 @@ function getPreviewType(filePath) {
   return 'iframe';
 }
 
+function getPreviewType(filePath) {
+  const ext = filePath.split('.').pop().toLowerCase();
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+  if (['doc', 'docx'].includes(ext)) return 'newtab'; // open in new tab
+  return 'iframe';
+}
+
 function DocumentList({ familyCode, pin }) {
   const [documents, setDocuments] = useState([]);
   const [searchName, setSearchName] = useState('');
@@ -316,16 +323,37 @@ function DocumentList({ familyCode, pin }) {
                 {/* Modal body — shows image or iframe depending on file type */}
                 <div className="fv-preview-body">
                   {getPreviewType(previewDoc.filePath) === 'image' ? (
-                      // For images — simple <img> tag, Cloudinary URL works directly
                       <img
                           src={previewDoc.filePath}
                           alt={previewDoc.name}
                           className="fv-preview-image"
                       />
+                  ) : getPreviewType(previewDoc.filePath) === 'newtab' ? (
+                      // DOCX — can't preview in browser, show a message with open button
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        gap: '16px'
+                      }}>
+                        <div style={{ fontSize: '48px' }}>📝</div>
+                        <div style={{ fontSize: '16px', color: 'var(--text-mid)' }}>
+                          Word documents can't be previewed in browser
+                        </div>
+
+                        <a
+                          href={getPreviewUrl(previewDoc.filePath)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="fv-btn fv-btn-primary"
+                          style={{ width: 'auto', padding: '12px 28px' }}
+                        >
+                          Open in Google Docs →
+                        </a>
+                      </div>
                   ) : (
-                      // For PDF and DOCX — iframe loads the URL
-                      // PDF: browser renders natively
-                      // DOCX: Google Docs Viewer renders it
                       <iframe
                           src={getPreviewUrl(previewDoc.filePath)}
                           title={previewDoc.name}
