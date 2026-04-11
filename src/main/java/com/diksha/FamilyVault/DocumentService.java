@@ -26,7 +26,8 @@ public class DocumentService {
         Map<String, Object> options = new HashMap<>();
         options.put("folder", "familyvault/" + familyCode);
         options.put("resource_type", "auto");
-
+        options.put("use_filename" , true);
+        options.put("unique_filename" , false);
         // Upload file to Cloudinary
         // file.getBytes() converts the file into raw bytes Cloudinary can send
         // upload() returns a Map containing URL, public_id, size, format etc.
