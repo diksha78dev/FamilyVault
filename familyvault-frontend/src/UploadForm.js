@@ -97,7 +97,7 @@ function UploadForm({ familyCode, pin }) {
         </div>
 
         <div 
-          className="fv-form-drop"
+          className="fv-file-drop"
           onClick={(e) => document.getElementById('fv-file-input').click()}
         >
           <input
