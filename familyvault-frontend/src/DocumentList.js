@@ -34,13 +34,8 @@ function getPreviewUrl(filePath) {
 
 // NEW: tells us HOW to render the preview inside the modal
 // images → use <img> tag
-// everything else → use <iframe> (PDF, DOCX via Google Docs)
-function getPreviewType(filePath) {
-  const ext = filePath.split('.').pop().toLowerCase();
-  if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
-  return 'iframe';
-}
-
+// DOCX files → open in new tab via Google Docs Viewer
+// PDFs → use <iframe> for native browser rendering
 function getPreviewType(filePath) {
   const ext = filePath.split('.').pop().toLowerCase();
   if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
