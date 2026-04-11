@@ -16,7 +16,7 @@ still got lost. So I built FamilyVault.
 
 ## Tech Stack
 - Backend: Spring Boot + JPA + MySQL
-- Frontend: React + Tailwind CSS (in progress)
+- Frontend: React + Custom CSS (Sora + DM Sans, CSS variables)
 
 ## Status
 🚧 Active development — backend complete, frontend coming soon
