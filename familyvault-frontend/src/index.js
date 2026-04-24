@@ -12,9 +12,8 @@ function AuthWrapper() {
   // Store the logged-in family's credentials
   const [familyCode, setFamilyCode] = useState(localStorage.getItem('familyCode'));
   const [pin, setPin] = useState(localStorage.getItem('pin'));
-  const [pin, setPin] = useState(null);
-
   // Called when login is successful
+  
   const handleLoginSuccess = (code, p) => {
     setFamilyCode(code);
     setPin(p);
