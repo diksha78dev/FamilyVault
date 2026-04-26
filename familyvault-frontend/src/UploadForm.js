@@ -15,43 +15,46 @@ function UploadForm({ familyCode, pin }) {
   };
 
   const handleUpload = async () => {
-    if(!name || !category || !file) {
-      showToast('error','Please fill in all the fields and select a file.');
+    // check fields first — file must exist before we touch file.size
+    if (!name || !category || !file) {
+      showToast('error', 'Please fill in all the fields and select a file.');
       return;
     }
-
+  
+    // now safe to check file.size because we confirmed file is not null above
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('error', 'File too large. Maximum size is 10MB.');
+      return;
+    }
+  
     const formData = new FormData();
-    // JS object that can hold key-value pairs, where the value can be a string or a file
-    formData.append('name' , name);
-    formData.append('category' , category);
-    formData.append('familyCode' , familyCode);
-    formData.append('file' , file);
+    formData.append('name', name);
+    formData.append('category', category);
+    formData.append('familyCode', familyCode);
+    formData.append('file', file);
     formData.append('pin', pin);
-
+  
     setLoading(true);
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/documents/upload`, {
         method: 'POST',
         body: formData
       });
-
+  
       if (response.ok) {
         showToast('success', `"${name}" uploaded successfully! ✓`);
         setName('');
         setCategory('');
         setFile(null);
-        // do NOT reset familyCode and pin — they are props now
         setLoading(false);
-      }
-      else {
-        showToast('error', 'Upload failed. is your backend running on port 8080?');
+      } else {
+        showToast('error', 'Upload failed. Please try again.');
         setLoading(false);
       }
     } catch (err) {
-      showToast('error', 'Cannot reach server. Check if Spring Boot is running.');
+      showToast('error', 'Cannot reach server. Please try again later.');
       setLoading(false);
     }
-    
   };
 
   const getFileIcon = (f) => {

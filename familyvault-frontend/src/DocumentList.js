@@ -108,8 +108,10 @@ function DocumentList({ familyCode, pin }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = decodeURIComponent(doc.filePath.split('/').pop());
-      a.download = fileName;
+      // use doc.name (user-typed) instead of extracting from Cloudinary URL
+      // Cloudinary URLs contain path segments that make ugly filenames
+      const ext = doc.filePath.split('.').pop().toLowerCase();
+      a.download = `${doc.name}.${ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
