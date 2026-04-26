@@ -134,7 +134,7 @@ function LandingPage() {
       <footer className="lp-footer">
         <div className="lp-footer-logo">🔐 FamilyVault</div>
         <div className="lp-footer-sub">
-          Built with ❤️ by Diksha Dabhole & Vaishnavi Patukale · 3rd Year CSE
+          Built with ❤️ by Diksha Dabhole · 3rd Year CSE
         </div>
         <a
           className="lp-footer-link"
