@@ -1,16 +1,18 @@
 package com.diksha.FamilyVault;
 
-import com.cloudinary.Cloudinary;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.cloudinary.Cloudinary;
 
 @Configuration
 public class CloudinaryConfig {
 
-    // @Value reads the value from application.properties
+    // @Value reads the value from application.properties or environment variables
     // If the property is missing, app will fail to start — intentional
     @Value("${CLOUDINARY_CLOUD_NAME}")
     private String cloudName;

@@ -88,6 +88,12 @@ function DocumentList({ familyCode, pin }) {
     return acc;
   }, {});
 
+  const totalDocs = documents.length;
+  const totalCategories = Object.keys(categoryCounts).filter(k => categoryCounts[k] > 0).length;
+  const lastUpload = documents.length > 0
+    ? [...documents].sort((a, b) => new Date(b.uploadAt) - new Date(a.uploadAt))[0].uploadAt
+    : null;
+
   const filteredDocs = documents.filter((doc) => {
     const matchCat = activeCategory ? doc.category === activeCategory : true;
     const matchSearch = searchName
@@ -162,6 +168,21 @@ function DocumentList({ familyCode, pin }) {
                   );
                 })}
               </div>
+
+              <div className="fv-stats-bar">
+              <div className="fv-stat-card">
+                <div className="fv-stat-number">{totalDocs}</div>
+                <div className="fv-stat-label">Total Documents</div>
+              </div>
+              <div className="fv-stat-card">
+                <div className="fv-stat-number">{totalCategories}</div>
+                <div className="fv-stat-label">Categories Used</div>
+              </div>
+              <div className="fv-stat-card">
+                <div className="fv-stat-number">📅</div>
+                <div className="fv-stat-label">Last Upload: {lastUpload ?? 'N/A'}</div>
+              </div>
+            </div>
 
               <div className="fv-table-card">
                 <div className="fv-table-header">
